@@ -82,7 +82,7 @@ When RNG is set to 2, the rand() function is used to sample 32-bit values.
 
 ## Hardware Implementations
 
-We provide RTL generation scripts Main_generator.py located at ./HW/python that can generate hardware implementations with different security levels for different bit widths. The ./HW/lib contains basic gate implementations for Python to generate RTL. 
+We provide RTL generation scripts Main_Generator.py located at ./HW/python that can generate hardware implementations with different security levels for different bit widths. The ./HW/lib contains basic gate implementations for Python to generate RTL. 
 
 We can choose from different hardware platforms.\
 If you want to use behavior level for this RTL, please define SIM in ./HW/lib/lix_define.v.\
@@ -103,7 +103,7 @@ The version of PyYAML package we are using is 5.3.1 as shown in command.
 Use the following command to generate an RTL with the specified parameters:
 ```bash
 cd ./HW/python
-python3 Main_generator.py [type] [shares] [width] [dumpon] [print_debug]
+python3 Main_Generator.py [type] [shares] [width] [dumpon] [print_debug]
 ```
 The commands `type` `shares` `width` `dumpon` `print_debug` are all adjustable options.
 
@@ -125,21 +125,21 @@ Option:\
 generate our CSA-based SecA2B with shares = 3, width = 32 , turn off fsdb dumpfile for Test Bench and turn off debug information.
 ```bash
 cd ./HW/python
-python3 Main_generator.py SecA2B 3 32 0 0
+python3 Main_Generator.py SecA2B 3 32 0 0
 ```
 
 * command example2:
 generate ConvertAB [CGTV15] with shares = 3, width = 32 , turn off fsdb dumpfile for Test Bench and turn off debug information.
 ```bash
 cd ./HW/python
-python3 Main_generator.py ConvertAB 3 32 0 0
+python3 Main_Generator.py ConvertAB 3 32 0 0
 ```
 
  * command example3:
 generate ConvertAB_RCA [BC22] with shares = 3, width = 32 , turn off fsdb dumpfile for Test Bench and turn off debug information.
 ```bash
 cd ./HW/python
-python3 Main_generator.py ConvertAB_RCA 3 32 0 0
+python3 Main_Generator.py ConvertAB_RCA 3 32 0 0
 ```
 ### Command results
 A successful run of command will generate the following directory in the current directory ./HW/python:
