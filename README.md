@@ -42,9 +42,9 @@ Using Python 3.
 
 ### Function Test
 To get the function tests, run the python script run_test.py by commands:
-```
-$ cd ./SW
-$ python3 run_test.py
+```bash
+cd ./SW
+python3 run_test.py
 ```
 
 The test results **test_res.txt** will be generated in current directory. \
@@ -52,9 +52,9 @@ The test results **test_res.txt** will be generated in current directory. \
 
 ### Benchmarks
 To get the benchmarks, run the python script run_benchmarks.py by commands:
-```
-$ cd ./SW
-$ python3 run_benchmarks.py
+```bash
+cd ./SW
+python3 run_benchmarks.py
 ```
 The benchmark results **bench_res.txt** will be generated in current directory. \
 **bench_res_ref.txt** is expected results with default gcc compile optimization options -O0 for reference.\
@@ -101,9 +101,9 @@ pip install PyYAML==5.3.1
 The version of PyYAML package we are using is 5.3.1 as shown in command.
 
 Use the following command to generate an RTL with the specified parameters:
-```
-$ cd ./HW/python
-$ python3 Main_generator.py [type] [shares] [width] [dumpon] [print_debug]
+```bash
+cd ./HW/python
+python3 Main_generator.py [type] [shares] [width] [dumpon] [print_debug]
 ```
 The commands `type` `shares` `width` `dumpon` `print_debug` are all adjustable options.
 
@@ -123,23 +123,23 @@ Option:\
 
 * command example1:
 generate our CSA-based SecA2B with shares = 3, width = 32 , turn off fsdb dumpfile for Test Bench and turn off debug information.
-```
-$ cd ./HW/python
-$ python3 Main_generator.py SecA2B 3 32 0 0
+```bash
+cd ./HW/python
+python3 Main_generator.py SecA2B 3 32 0 0
 ```
 
 * command example2:
 generate ConvertAB [CGTV15] with shares = 3, width = 32 , turn off fsdb dumpfile for Test Bench and turn off debug information.
-```
-$ cd ./HW/python
-$ python3 Main_generator.py ConvertAB 3 32 0 0
+```bash
+cd ./HW/python
+python3 Main_generator.py ConvertAB 3 32 0 0
 ```
 
  * command example3:
 generate ConvertAB_RCA [BC22] with shares = 3, width = 32 , turn off fsdb dumpfile for Test Bench and turn off debug information.
-```
-$ cd ./HW/python
-$ python3 Main_generator.py ConvertAB_RCA 3 32 0 0
+```bash
+cd ./HW/python
+python3 Main_generator.py ConvertAB_RCA 3 32 0 0
 ```
 ### Command results
 A successful run of command will generate the following directory in the current directory ./HW/python:
@@ -175,16 +175,16 @@ Modify the ./HW/python/syn_lib/library_setup_dc.tcl script to setup the path to 
 
 ***Synthesis***\
 After running RTL generation command, we can run the following command in the current directory ./HW/python for synthesis:
-```
-$ cd ./syn
-$ dc_shell -f ../script/synthesis_dc.tcl
+```bash
+cd ./syn
+dc_shell -f ../script/synthesis_dc.tcl
 ```
 We can adjust the `CLK_PERIOD` in the timing constraints file at ./HW/python/sdc to avoid timing violations.
 
 Or you can use our generated rtl code under the expected_results path for direct synthesis. Take CSA-based A2B rtl with 3 shares and 32 bit width as an example. Modify the ./HW/expected_results/csa_n3k32/syn_lib/library_setup_dc.tcl script to setup the path to the library, and use the following command:
-```
-$ cd ./HW/expected_results/csa_n3k32/syn
-$ dc_shell -f ../script/synthesis_dc.tcl
+```bash
+cd ./HW/expected_results/csa_n3k32/syn
+dc_shell -f ../script/synthesis_dc.tcl
 ```
 
 ***Reference results***\
