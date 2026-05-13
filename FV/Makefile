@@ -123,4 +123,80 @@ sim_a2b_csa_n4:
 	cd obj_dir && ./Vtb_SecA2B_n_k
 
 
+# ============================================================================
+# Formal Verification Flow for SecA2B (RCA/KSA/CSA) with Yosys + SILVER
+# ============================================================================
 
+YOSYS      ?= yosys
+LIBERTY    ?= /home/lucien/git/ProverNG/yosys/LIB/custom_cells.lib
+SILVER_ENC ?= python ./make_silver_new.py
+
+SPEC_DIR   := spec
+SYN_DIR    := syn
+
+TYPES := csa ksa rca
+N_VALS := 2 3 4
+K_VALS := 4 8 16
+# Define source file set at the beginning of the file
+DESIGN_DIRS := csa ksa rca lib
+# Collect all .sv files (excluding testbenches)
+SRC_FILES := $(shell find $(DESIGN_DIRS) -maxdepth 1 -type f -name "*.sv" ! -name "tb_*.sv")
+# Collect .v files from lib (e.g., MSKand_hpc2.v)
+SRC_FILES += $(wildcard lib/*.v)
+# Remove duplicates and convert to space-separated format
+SRC_FILES := $(sort $(SRC_FILES))
+# ------------------------------------------------------------------------
+# Generate spec files (k=4,8,16)
+# ------------------------------------------------------------------------
+$(SPEC_DIR)/k%_spec.json:
+	mkdir -p $(SPEC_DIR)
+	@echo '{' > $@
+	@echo '    "ina" : {"type": "S", "len": $*},' >> $@
+	@echo '    "out" : {"type": "O", "len": $*},' >> $@
+	@echo '    "rnd" : {"type": "M", "len": "?"},' >> $@
+	@echo '    "clk": {"type": 1, "len": 1}' >> $@
+	@echo '}' >> $@
+
+# ------------------------------------------------------------------------
+# Define rule for building a single configuration (no eval pollution)
+# ------------------------------------------------------------------------
+define build_one
+syn/$(1)/n$(2)/k$(3)/.done: $(SPEC_DIR)/k$(3)_spec.json
+	mkdir -p $$(dir $$@)
+	@echo "=== Synthesizing $(1) n=$(2) k=$(3) ==="
+	$(eval TOP := $(if $(filter csa,$(1)),SecA2B_n_k,SecA2B_$(2)_k))
+	# Collect all .sv files under the current type directory (including recursive dependencies like SecA2B_1_k.sv)
+	$(eval DESIGN_FILES := $(shell find $(1) -maxdepth 1 -type f -name "*.sv" 2>/dev/null | sort))
+	$(eval LIB_FILES := $(wildcard lib/*.sv lib/*.v))
+	$(eval SRC_FILES := $(DESIGN_FILES) $(LIB_FILES))
+	@echo "Source files: $(SRC_FILES)"
+	export IN_FILES="$(SRC_FILES)"; \
+	export TOP_MODULE="$(TOP)"; \
+	export OUT_BASE="syn/$(1)/n$(2)/k$(3)/"; \
+	export LIBERTY="$(LIBERTY)"; \
+	export N="$(2)"; \
+	export K="$(3)"; \
+	$(YOSYS) -c synth.tcl -l "syn/$(1)/n$(2)/k$(3)/log.txt"
+	$(SILVER_ENC) --spec $(SPEC_DIR)/k$(3)_spec.json --circ syn/$(1)/n$(2)/k$(3)/post.json > syn/$(1)/n$(2)/k$(3)/circuit.nl
+	touch $$@
+endef
+
+# Expand all combinations
+$(foreach t,$(TYPES),\
+  $(foreach n,$(N_VALS),\
+    $(foreach k,$(K_VALS),\
+      $(eval $(call build_one,$(t),$(n),$(k)))\
+    )\
+  )\
+)
+
+.PHONY: all clean specs syn-all
+
+all: syn-all
+
+specs: $(foreach k,$(K_VALS),$(SPEC_DIR)/k$(k)_spec.json)
+
+syn-all: $(foreach t,$(TYPES),$(foreach n,$(N_VALS),$(foreach k,$(K_VALS),syn/$(t)/n$(n)/k$(k)/.done)))
+
+clean:
+	rm -rf $(SYN_DIR) $(SPEC_DIR)
