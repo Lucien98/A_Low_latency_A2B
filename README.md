@@ -191,3 +191,79 @@ dc_shell -f ../script/synthesis_dc.tcl
 As shown in Table below, we give the synthesized results under the open source process library Nangate45 as a reference.
 
 ![ ](https://github.com/ybhphoenix/A_Low_latency_A2B/blob/main/Nangate_syn_redults.png)
+
+## Formal Verification of masked A2B schemes
+The `FV` directory has the RTL code used for formal verification. Since the verification tool SILVER, ProverNG, ProverABM only support RTL codes without control signals, the codes in `FV` only contain input and output ports that are shares, random numbers or the clock signal.
+
+Only the codes for `n=2,3,4` are provided in `FV`.
+
+```
+|-- FV/                       ## root directory for RTL source files for formal verification
+  |-- csa/                     ## CSA-based A2B conversion implementations
+    |-- SecA2B_n_k.sv          ## CSA based A2B with parameterizable shares (n) and bit-width (k)
+  |-- lib/                     ## basic building blocks (shared gates, small adders) for A2B construction
+    |-- SecA2B_CS_3_k.sv       ## carry‑save A2B module for 3 shares
+    |-- SecA2B_CS_4_k.sv       ## carry‑save A2B module for 4 shares
+    |-- SecKSA_n_k.sv          ## Kogge‑Stone adder (KSA) as a building block for A2B
+    |-- SecAnd_n_k.sv          ## secure AND gate (masked AND) for n shares
+    |-- SecCSA_n_k.sv          ## secure carry‑save adder (CSA) for n shares
+    |-- SecRCA_n_k.sv          ## secure ripple‑carry adder (RCA) for n shares
+  |-- ksa/                     ## KSA-based full A2B conversion modules
+    |-- SecA2B_1_k.sv          ## KSA‑based A2B for 1 share (unmasked)
+    |-- SecA2B_4_k.sv          ## KSA‑based A2B for 4 shares
+    |-- SecA2B_2_k.sv          ## KSA‑based A2B for 2 shares
+    |-- SecA2B_3_k.sv          ## KSA‑based A2B for 3 shares
+  |-- rca/                     ## RCA-based full A2B conversion modules
+    |-- SecA2B_1_k.sv          ## RCA‑based A2B for 1 share
+    |-- SecA2B_4_k.sv          ## RCA‑based A2B for 4 shares
+    |-- SecA2B_2_k.sv          ## RCA‑based A2B for 2 shares
+    |-- SecA2B_3_k.sv          ## RCA‑based A2B for 3 shares
+  |-- tb/                      ## testbenches for all A2B modules
+    |-- tb_SecA2B_CS_4_k.sv    ## testbench for SecA2B_CS_4_k
+    |-- tb_SecA2B_csa.sv       ## testbench for CSA‑based A2B (general)
+    |-- tb_SecRCA_n_k.sv       ## testbench for SecRCA_n_k
+    |-- tb_SecA2B_rca.sv       ## testbench for RCA‑based A2B (general)
+    |-- tb_SecA2B_CS_3_k.sv    ## testbench for SecA2B_CS_3_k
+    |-- tb_SecA2B_ksa.sv       ## testbench for KSA‑based A2B (general)
+    |-- tb_SecKSA_n_k.sv       ## testbench for SecKSA_n_k
+    |-- tb_SecAnd_n_k.sv       ## testbench for SecAnd_n_k
+    |-- tb_SecCSA_n_k.sv       ## testbench for SecCSA_n_k
+  |-- Makefile                 ## Makefile: run the simulation of the testbenchs; use yosys to generate netlist files
+```
+
+1. Change the directory to `FV`. If you are not interested in verifying the correctness of the modules, please go to step 4.
+```bash
+cd FV
+```
+2. Do the simulation for the building blocks. The parameter `n` and `k` should be changed manually if you want to check the correctness of other values of `n` and `k`.
+```bash
+make sim_secand_n2k4 # building block for all A2B
+make sim_secrca_n2k8 # building block for A2B_RCA
+make sim_ksa_n2k8    # building block for A2B_KSA
+make sim_csa_n2k8    # building block for A2B_CSA_CS
+make sim_a2b_cs_n3k8 # building block for A2B_CSA
+```
+
+3. Do the simulation for the A2B masking schemes.
+
+```bash
+make sim_a2b_rca_n2  # A2B based on RC adder
+make sim_a2b_ksa_n2  # A2B based on KS adder
+make sim_a2b_csa_n2  # A2B based on CS adder
+```
+4. Generate the netlist files for formal verification
+
+```bash
+make syn-all
+```
+For a specific A2B masking scheme with:
+
+- **type** being `$type`,
+- **number of shares** being `$i`,
+- **input data width** being `$j`,
+
+the generated netlist file `circuit.nl` is located in `syn/$type/n$i/$j/`, where:
+
+- Optional values for `$type`: `rca`, `ksa`, `csa`
+- Optional values for `$i`: `2`, `3`, `4`
+- Optional values for `$j`: `4`, `8`, `16`

@@ -16,6 +16,10 @@ sim_secrca_n2k8:
 		-Ilib -Itb
 	./obj_dir/Vtb_SecRCA_n_k
 
+sim_ksa_n2k8:
+	verilator --binary -j 0 -Wno-WIDTHTRUNC --trace \
+		./tb/tb_SecKSA_n_k.sv --top-module tb_SecKSA_n_k \
+		-Ilib -Itb && ./obj_dir/Vtb_SecKSA_n_k
 
 # ============================================================================
 # SecA2B using Kogge‑Stone adder (KSA) test targets
