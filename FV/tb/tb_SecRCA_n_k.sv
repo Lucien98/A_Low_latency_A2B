@@ -15,7 +15,7 @@ module tb_SecRCA_n_k();
     wire [k*d-1:0] out;
 
     // DUT instance
-    SecRCA_n_k #(.d(d), .k(k)) dut (
+    SecRCA_n_k #(.n(d), .k(k)) dut (
         .clk(clk),
         .ina(ina),
         .inb(inb),
